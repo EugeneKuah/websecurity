@@ -1,6 +1,7 @@
 from tools.sqlmap_scan import run_sqlmap
 from tools.zap_scan import run_zap_scan
 from tools.virustotal_scan import run_virustotal_url_scan
+from tools.nikto_scan import run_nikto_scan
 
 def main():
     print("=== InjeXpose ===")
@@ -11,12 +12,13 @@ def main():
     print("2) OWASP ZAP (Spider + Active Scan)")
     print("3) Run BOTH")
     print("4) VirusTotal (URL Reputation Scan)")
-    print("5) Run ALL (SQLMap + ZAP + VirusTotal)")
-    choice = input("Enter 1/2/3/4/5: ").strip()
+    print("5) Nikto (Web Server Scanner)")
+    print("6) Run ALL (SQLMap + ZAP + VirusTotal + Nikto)")
+    choice = input("Enter 1/2/3/4/5/6: ").strip()
     
 
     cookies = None
-    if choice in ("1", "3", "5"):
+    if choice in ("1", "3", "6"):
         cookies = input("Cookies for SQLMap (press Enter to skip): ").strip() or None
 
     if choice == "1":
@@ -40,14 +42,22 @@ def main():
         print(f"[+] VirusTotal done. Outputs saved to: {vt_json} and {vt_summary}")
 
     elif choice == "5":
-        out = run_sqlmap(target, cookies=cookies)
-        print(f"[+] SQLMap done. Output saved to: {out}")
+    	nikto_out = run_nikto_scan(target)
+    	print(f"[+] Nikto done. Output saved to: {nikto_out}")
 
-        html_path, json_path = run_zap_scan(target)
-        print(f"[+] ZAP done. Reports saved to: {html_path} and {json_path}")
+    elif choice == "6":
+    	out = run_sqlmap(target, cookies=cookies)
+    	print(f"[+] SQLMap done. Output saved to: {out}")
 
-        vt_json, vt_summary = run_virustotal_url_scan(target)
-        print(f"[+] VirusTotal done. Outputs saved to: {vt_json} and {vt_summary}")
+    	html_path, json_path = run_zap_scan(target)
+    	print(f"[+] ZAP done. Reports saved to: {html_path} and {json_path}")
+
+    	vt_json, vt_summary = run_virustotal_url_scan(target)
+    	print(f"[+] VirusTotal done. Outputs saved to: {vt_json} and {vt_summary}")
+
+    	nikto_out = run_nikto_scan(target)
+    	print(f"[+] Nikto done. Output saved to: {nikto_out}")
+
     else:
         print("Invalid choice.")
 
