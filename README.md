@@ -25,11 +25,11 @@ injexpose/
 ├─ tools/
 │  ├─ sqlmap_scan.py         # SQLMap integration
 │  ├─ zap_scan.py            # OWASP ZAP integration
-│  └─ virustotal_scan.py     # VirusTotal URL reputation scanning
+│  ├─ virustotal_scan.py     # VirusTotal URL reputation scanning
 ├─ reports/
 │  ├─ sqlmap/                # SQLMap outputs
 │  ├─ zap/                   # ZAP HTML/JSON reports
-│  └─ virustotal/            # VirusTotal JSON & summary outputs
+│  ├─ virustotal/            # VirusTotal JSON & summary outputs
 └─ venv/                     # Python virtual environment (recommended on Kali)
 
 ---
