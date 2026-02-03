@@ -28,7 +28,9 @@ def run_sqlmap(
         "--random-agent",
         f"--level={level}",
         f"--risk={risk}",
-        "-p", "id",
+        "--crawl=3",
+        "--forms",
+        "--all",
     ]
 
     if cookies:
