@@ -1,114 +1,115 @@
-import os
-import re
-import subprocess
-import requests
+import getpass
+
+from tools.sqlmap_scan import run_sqlmap
+from tools.zap_scan import run_zap_scan
+from tools.virustotal_scan import run_virustotal_url_scan
+from tools.nikto_scan import run_nikto_scan
 
 
-def get_csrf_token(session: requests.Session, login_url: str) -> str:
+def _choose_level_preset() -> int:
+    print("\nSQLMap Level Presets:")
+    print("1) Level 1 (fast)")
+    print("2) Level 2 (balanced)")
+    print("3) Level 3 (deeper, slower)")
+    pick = input("Choose 1/2/3: ").strip()
+    if pick not in ("1", "2", "3"):
+        print("Invalid. Defaulting to Level 1.")
+        pick = "1"
+    return int(pick)
+
+
+def _cookie_flow_once() -> str | None:
     """
-    Get CSRF token from DVWA login page.
-    Works without BeautifulSoup using regex.
+    Jordan-style:
+      - Ask login required? y/n
+      - If yes: ask login URL + username + password, auto-login DVWA and return cookie string
+      - If no: optional manual cookie paste
     """
-    r = session.get(login_url, timeout=15)
+    need_login = input("Login required? (y/N): ").strip().lower() == "y"
 
-    # Flexible regex to match token in HTML
-    match = re.search(r'name=["\']user_token["\']\s+value=["\']([^"\']+)["\']', r.text)
+    if not need_login:
+        manual = input("Cookies (press Enter to skip): ").strip()
+        return manual or None
 
-    if not match:
-        # Fallback: sometimes token appears in JS
-        match = re.search(r'user_token=([a-zA-Z0-9]+)', r.text)
+    login_url = input("Login URL:\n> ").strip()
+    username = input("Username:\n> ").strip()
+    password = getpass.getpass("Password (hidden): ")
 
-    return match.group(1) if match else ""
-
-
-def login_and_get_cookies(login_url: str, username: str, password: str) -> str:
-    """
-    Login to DVWA and return cookie string.
-    """
-    session = requests.Session()
-
-    token = get_csrf_token(session, login_url)
-
-    if not token:
-        print("[!] Could not find CSRF token (attempts failed).")
-        return ""
-
-    payload = {
-        "username": username,
-        "password": password,
-        "Login": "Login",
-        "user_token": token,
-    }
-
-    response = session.post(login_url, data=payload, timeout=15)
-
-    if "Login" in response.text and "user_token" in response.text:
-        print("[!] Login failed. Check username/password.")
-        return ""
-
-    cookies = session.cookies.get_dict()
-    return "; ".join([f"{k}={v}" for k, v in cookies.items()])
-
-
-def run_sqlmap(target: str, cookies: str | None = None) -> str:
-    """
-    Run sqlmap against a target URL and return stdout+stderr text.
-    """
-    command = [
-        "sqlmap",
-        "-u", target,
-        "--batch",
-        "--level", "5",
-        "--risk", "3",
-        "--random-agent",
-    ]
-
-    if cookies:
-        command.extend(["--cookie", cookies])
-
-    print("[*] Running SQLmap...")
-    print(f"[*] Command: {' '.join(command)}")
-
-    result = subprocess.run(command, capture_output=True, text=True)
-
-    output = (result.stdout or "") + ("\n" + result.stderr if result.stderr else "")
-    return output
+    try:
+        from tools.dvwa_auth import dvwa_login_and_get_cookie
+        cookie = dvwa_login_and_get_cookie(login_url, username, password, security_level="low")
+        print("[Auth] Auto-login success ✅")
+        print(f"[Auth] Cookie: {cookie}")
+        return cookie
+    except Exception as e:
+        print("[Auth] Auto-login failed ❌")
+        print(e)
+        manual = input("Paste cookies manually (or press Enter to skip): ").strip()
+        return manual or None
 
 
 def main():
-    target = input("Enter target URL:\n> ").strip()
+    print("=== InjeXpose ===")
+    target = input("Target URL:\n> ").strip()
 
-    if not target:
-        print("[!] No URL provided. Exiting.")
-        return
+    print("\nChoose tool:")
+    print("1) SQLMap (SQL Injection)")
+    print("2) OWASP ZAP (Spider + Active Scan)")
+    print("3) Run BOTH")
+    print("4) VirusTotal (URL Reputation Scan)")
+    print("5) Nikto (Web Server Scanner)")
+    print("6) Run ALL (SQLMap + ZAP + VirusTotal + Nikto)")
+    choice = input("Enter 1/2/3/4/5/6: ").strip()
 
-    login_required = input("Does this target require login? (y/N): ").strip().lower() == "y"
+    cookies = None
+    preset = 1
 
-    cookies = ""
-    if login_required:
-        login_url = input("Login URL:\n> ").strip()
-        username = input("Username:\n> ").strip()
-        password = input("Password:\n> ").strip()
+    # If any tool that benefits from cookies is selected, do auth once
+    if choice in ("1", "2", "3", "5", "6"):
+        cookies = _cookie_flow_once()
 
-        print("[*] Attempting login to retrieve session cookies...")
-        cookies = login_and_get_cookies(login_url, username, password)
+    if choice in ("1", "3", "6"):
+        preset = _choose_level_preset()
 
-        if not cookies:
-            print("[!] Failed to login. Exiting.")
-            return
+    if choice == "1":
+        out = run_sqlmap(target, cookies=cookies, level_preset=preset)
+        print(f"[+] SQLMap done. Output saved to: {out}")
 
-        print(f"[*] Using cookies: {cookies}")
+    elif choice == "2":
+        html_path, json_path = run_zap_scan(target, cookies=cookies)
+        print(f"[+] ZAP done. Reports saved to: {html_path} and {json_path}")
 
-    output = run_sqlmap(target, cookies if cookies else None)
+    elif choice == "3":
+        out = run_sqlmap(target, cookies=cookies, level_preset=preset)
+        print(f"[+] SQLMap done. Output saved to: {out}")
 
-    os.makedirs("reports", exist_ok=True)
-    out_path = os.path.join("reports", "sqlmap_output.txt")
-    with open(out_path, "w", encoding="utf-8") as f:
-        f.write(output)
+        html_path, json_path = run_zap_scan(target, cookies=cookies)
+        print(f"[+] ZAP done. Reports saved to: {html_path} and {json_path}")
 
-    print(f"[+] Scan complete. Output saved to {out_path}")
+    elif choice == "4":
+        vt_json, vt_summary = run_virustotal_url_scan(target)
+        print(f"[+] VirusTotal done. Outputs saved to: {vt_json} and {vt_summary}")
+
+    elif choice == "5":
+        nikto_out = run_nikto_scan(target, cookies=cookies)
+        print(f"[+] Nikto done. Output saved to: {nikto_out}")
+
+    elif choice == "6":
+        out = run_sqlmap(target, cookies=cookies, level_preset=preset)
+        print(f"[+] SQLMap done. Output saved to: {out}")
+
+        html_path, json_path = run_zap_scan(target, cookies=cookies)
+        print(f"[+] ZAP done. Reports saved to: {html_path} and {json_path}")
+
+        vt_json, vt_summary = run_virustotal_url_scan(target)
+        print(f"[+] VirusTotal done. Outputs saved to: {vt_json} and {vt_summary}")
+
+        nikto_out = run_nikto_scan(target, cookies=cookies)
+        print(f"[+] Nikto done. Output saved to: {nikto_out}")
+
+    else:
+        print("Invalid choice.")
 
 
 if __name__ == "__main__":
     main()
-

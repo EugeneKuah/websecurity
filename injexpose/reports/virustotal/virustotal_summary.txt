@@ -1,0 +1,11 @@
+=== VirusTotal URL Scan Summary ===
+Target: http://127.0.0.1
+
+Detection Stats:
+  malicious   : 0
+  suspicious  : 0
+  harmless    : 65
+  undetected  : 29
+  timeout     : 0
+
+Full JSON report: reports/virustotal/virustotal_report.json
