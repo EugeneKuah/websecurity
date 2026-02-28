@@ -1,273 +1,232 @@
-# InjeXpose (DVWA Scanner + Local LLM Report)
+# InjeXpose
 
-InjeXpose is a CLI-based web security scanner workflow that integrates:
-- SQLMap (SQL Injection testing)
-- OWASP ZAP (Spider + Active Scan)
-- Nikto (Web server scan)
-- VirusTotal (URL reputation scan)
-- **Local LLM Report via Ollama** (no OpenAI API key required)
+## Enterprise-Oriented Web Vulnerability Scanning Framework with LLM-Based Reporting
 
-This README is written so teammates can clone the repo and get everything working reliably on Kali Linux / VMware.
+InjeXpose is a modular web application vulnerability scanning framework
+designed to integrate multiple industry-standard security tools into a
+unified workflow. It consolidates technical findings into a structured,
+executive-ready report using a Large Language Model (LLM).
 
----
+The system is intended for controlled environments, security
+laboratories, academic research, and authorized application security
+assessments.
 
-## 1. System Requirements
+------------------------------------------------------------------------
 
-### OS
-- Kali Linux (recommended)
-- Other Debian-based Linux distros should also work
+## 1. Overview
 
-### Hardware (important for LLM)
-- Minimum: **8 GB RAM**
-- Recommended: **16 GB RAM**
-- CPU: 2–4 cores minimum
+Modern web security assessments often require the orchestration of
+multiple tools, each producing fragmented outputs. InjeXpose addresses
+this by:
 
-If your system has less RAM, use a smaller Ollama model.
+-   Executing multiple security scanners in a coordinated manner
+-   Standardizing output storage and structure
+-   Automatically detecting the most recent scan artifacts
+-   Generating a consolidated, structured security report via LLM
+    summarization
 
----
+The framework emphasizes modularity, extensibility, and professional
+reporting.
 
-## 2. Install System Dependencies
+------------------------------------------------------------------------
 
-Update system:
-```bash
-sudo apt update
-```
+## 2. Core Capabilities
 
-Install required packages:
-```bash
-sudo apt install -y python3 python3-venv python3-pip git curl ca-certificates docker.io
-sudo update-ca-certificates
-```
+### 2.1 Integrated Security Tools
 
-Enable Docker:
-```bash
-sudo systemctl enable --now docker
-```
+-   **SQLMap** -- Automated SQL Injection detection and exploitation
+    testing
+-   **OWASP ZAP** -- Spidering and active web application scanning
+-   **Nikto** -- Web server misconfiguration and exposure detection
+-   **VirusTotal API** -- External URL reputation intelligence
+-   **Ollama (LLM)** -- Consolidated vulnerability reporting and
+    executive summary generation
 
-(Optional) Avoid using sudo for Docker:
-```bash
-sudo usermod -aG docker $USER
-newgrp docker
-```
+### 2.2 Reporting Features
 
----
+-   Executive summary generation
+-   Cross-tool vulnerability correlation
+-   Structured issue breakdown
+-   Remediation recommendations
+-   Risk contextualization
+-   Automatic latest-report detection
+-   Graceful handling of unsupported targets (e.g., localhost for
+    VirusTotal)
 
-## 3. Clone the Repository
+------------------------------------------------------------------------
 
-```bash
-git clone <YOUR_GITHUB_REPO_URL>
-cd injexpose
-```
+## 3. System Architecture
 
----
+InjeXpose\
+├── injexpose.py (Main CLI Interface)\
+├── tools/\
+│ ├── sqlmap_scan.py\
+│ ├── zap_scan.py\
+│ ├── nikto_scan.py\
+│ ├── virustotal_scan.py\
+│ └── llm_report.py\
+└── reports/\
+├── sqlmap/\
+├── zap/\
+├── nikto/\
+├── virustotal/\
+└── llm/
 
-## 4. Python Virtual Environment (Required on Kali)
+Each scanner operates independently and persists structured output
+within its respective directory.\
+The LLM module aggregates the latest scan outputs and produces a
+consolidated analytical report.
 
-Kali blocks global pip installs. Always use a virtual environment.
+------------------------------------------------------------------------
 
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-```
+## 4. Installation Requirements
 
-Upgrade pip and install Python dependencies:
-```bash
-pip install -U pip
-pip install requests
-```
+### 4.1 Operating System
 
----
+-   Kali Linux (recommended)
+-   Ubuntu or Debian-based distributions
 
-## 5. Run DVWA Using Docker (Port 8081)
+### 4.2 Required System Tools
 
-Start DVWA:
-```bash
-sudo docker run -d   --name dvwa   -p 8081:80   vulnerables/web-dvwa
-```
+Install core dependencies:
 
-If the container already exists:
-```bash
-sudo docker start dvwa
-```
+    sudo apt install sqlmap nikto zip
 
-Verify:
-```bash
-sudo docker ps
-```
+Install OWASP ZAP from:
 
-Open in browser:
-```
-http://localhost:8081
-```
+    https://www.zaproxy.org/download/
 
-Login:
-- Username: `admin`
-- Password: `password`
+Ensure ZAP is available in the system PATH.
 
-Set:
-- **DVWA Security → Low**
+### 4.3 Python Dependencies
 
----
+    pip install requests zapv2
 
-## 6. Install and Configure Ollama (Local LLM)
+### 4.4 LLM Environment (Ollama)
 
 Install Ollama:
-```bash
-curl -fsSL https://ollama.com/install.sh | sh
-```
 
-Enable and start Ollama:
-```bash
-sudo systemctl enable --now ollama
-```
+    curl -fsSL https://ollama.com/install.sh | sh
 
-Verify:
-```bash
-curl -s http://localhost:11434/api/tags
-```
+Pull required model:
 
-Pull a model (recommended):
-```bash
-ollama pull qwen2.5:7b
-```
+    ollama pull qwen2.5:7b
 
-Test:
-```bash
-ollama run qwen2.5:7b "Reply with one word: OK"
-```
+------------------------------------------------------------------------
 
-### Low RAM systems
-If you get a memory error:
-```bash
-ollama pull qwen2.5:3b
-# or
-ollama pull qwen2.5:1.5b
-```
+## 5. VirusTotal API Configuration
 
----
+1.  Create an account at https://www.virustotal.com\
 
-## 7. Running InjeXpose
+2.  Generate a personal API key\
 
-Activate venv:
-```bash
-source .venv/bin/activate
-```
+3.  Insert the API key inside:
 
-Run:
-```bash
-python3 injexpose.py
-```
+    tools/virustotal_scan.py
 
-Example target URL:
-```
-http://localhost:8081/vulnerabilities/sqli/?id=&Submit=Submit
-```
+Replace:
 
-Menu options:
-- **6** – Run ALL scans (recommended first)
-- **7** – Generate LLM report from scan outputs
+    API_KEY = "YOUR_API_KEY_HERE"
 
-### Best Workflow
-1. Start DVWA
-2. Set DVWA Security = Low
-3. Run **Option 6**
-4. Run **Option 7**
+Note: VirusTotal does not support private or localhost targets. The
+system automatically detects and skips unsupported targets without
+interrupting execution.
 
----
+------------------------------------------------------------------------
 
-## 8. Output Files
+## 6. Execution
 
-Reports are generated under:
-```
-reports/
-├── sqlmap/
-├── zap/
-├── nikto/
-├── virustotal/
-└── llm/
-```
+Launch the framework:
 
-LLM outputs:
-- `llm_report_YYYYMMDD_HHMMSS.json`
-- `llm_report_YYYYMMDD_HHMMSS.md`
+    python3 injexpose.py
 
----
+Main Menu Options:
 
-## 9. Troubleshooting
+1)  SQLMap (SQL Injection Testing)\
+2)  OWASP ZAP (Spider + Active Scan)\
+3)  Run BOTH\
+4)  VirusTotal (URL Reputation)\
+5)  Nikto (Web Server Assessment)\
+6)  Run ALL\
+7)  Generate LLM Report\
+8)  Exit
 
-### Docker permission denied
-```bash
-sudo docker ps
-```
+The LLM report should be generated after completing the desired scans.
 
-### DVWA container name conflict
-```bash
-sudo docker stop dvwa
-sudo docker rm dvwa
-sudo docker run -d --name dvwa -p 8081:80 vulnerables/web-dvwa
-```
+------------------------------------------------------------------------
 
-### Ollama already running
-This is normal. Verify with:
-```bash
-curl -s http://localhost:11434/api/tags
-```
+## 7. Example Controlled Test Environment
 
-### LLM report looks generic
-- Run scans first (Option 6)
-- Use authenticated DVWA pages
-- Ensure reports exist before Option 7
+Example using DVWA (Docker-based deployment):
 
-### Kali pip error (externally-managed-environment)
-Always use:
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-```
+    docker run --rm -it -p 8081:80 vulnerables/web-dvwa
 
----
+Example target:
 
-## 10. GitHub Hygiene
+    http://localhost:8081/vulnerabilities/sqli/
 
-Do NOT commit:
-- `.venv/`
-- `reports/`
-- API keys
+------------------------------------------------------------------------
 
-Recommended `.gitignore`:
-```gitignore
-.venv/
-reports/
-__pycache__/
-*.pyc
-.env
-```
+## 8. Output Structure
 
----
+Each tool produces structured output:
 
-## Quick Start
+-   SQLMap → Text reports
+-   ZAP → JSON and HTML reports
+-   Nikto → Text reports
+-   VirusTotal → JSON and text summaries
+-   LLM → Consolidated analytical report
 
-```bash
-sudo apt update
-sudo apt install -y python3 python3-venv python3-pip docker.io git curl ca-certificates
-sudo systemctl enable --now docker
-sudo systemctl enable --now ollama
+All outputs are stored under the `reports/` directory hierarchy.
 
-git clone <YOUR_GITHUB_REPO_URL>
-cd injexpose
+------------------------------------------------------------------------
 
-python3 -m venv .venv
-source .venv/bin/activate
-pip install requests
+## 9. Security and Compliance Notice
 
-sudo docker run -d --name dvwa -p 8081:80 vulnerables/web-dvwa
+This framework is intended strictly for:
 
-ollama pull qwen2.5:7b
+-   Authorized penetration testing
+-   Educational laboratories
+-   Academic research
+-   Controlled security environments
 
-python3 injexpose.py
-```
+Unauthorized scanning of external systems may violate applicable laws
+and organizational policies.
 
----
+Users are responsible for ensuring proper authorization before
+conducting any security testing.
+
+------------------------------------------------------------------------
+
+## 10. Design Principles
+
+-   Modular architecture
+-   Tool abstraction
+-   Structured reporting
+-   Automation-first workflow
+-   Professional output standardization
+-   Extensibility for future tool integration
+
+------------------------------------------------------------------------
+
+## 11. Future Enhancements
+
+-   CVSS-based scoring integration
+-   PDF and HTML executive report exports
+-   Multi-target batch scanning
+-   Dockerized full-stack deployment
+-   Role-based reporting profiles
+-   Centralized dashboard interface
+
+------------------------------------------------------------------------
+
+## Author
+
+Developed as part of a professional web security systems project.
+
+------------------------------------------------------------------------
 
 ## License
-(Add your license here)
+
+Provided for academic, research, and authorized security assessment
+purposes.
