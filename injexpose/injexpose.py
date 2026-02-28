@@ -1,10 +1,51 @@
 import getpass
+import os
+from urllib.parse import urlparse
 
 from tools.sqlmap_scan import run_sqlmap
 from tools.zap_scan import run_zap_scan
 from tools.virustotal_scan import run_virustotal_url_scan
 from tools.nikto_scan import run_nikto_scan
 from tools.ollama_report import generate_llm_report
+
+
+def derive_tool_targets(universal_url: str) -> dict:
+    """
+    User enters ONE universal URL. We derive tool-specific targets automatically.
+
+    Example input:
+      http://localhost:8081/vulnerabilities/sqli/
+
+    Derived:
+      - zap_target: page URL for crawling
+      - zap_seed: parameterized URL to seed baseline for DVWA forms
+      - sqlmap: parameterized URL (sqlmap needs a parameter)
+      - nikto: site root (nikto scans the server)
+      - virustotal: universal URL (VT uses the URL reputation)
+    """
+    u = (universal_url or "").strip()
+    p = urlparse(u)
+    base_site = f"{p.scheme}://{p.netloc}/" if p.scheme and p.netloc else u
+
+    zap_target = u
+    zap_seed = u
+    sqlmap_url = u
+
+    if "/vulnerabilities/sqli" in u:
+        base_page = u.split("?")[0]
+        if not base_page.endswith("/"):
+            base_page += "/"
+        zap_target = base_page
+        zap_seed = base_page + "?id=1&Submit=Submit"
+        sqlmap_url = zap_seed
+
+    return {
+        "zap_target": zap_target,
+        "zap_seed": zap_seed,
+        "sqlmap": sqlmap_url,
+        "nikto": base_site,
+        "virustotal": u,
+    }
 
 
 def _choose_level_preset() -> int:
@@ -21,10 +62,9 @@ def _choose_level_preset() -> int:
 
 def _cookie_flow_once() -> str | None:
     """
-    Jordan-style:
-      - Ask login required? y/n
-      - If yes: ask login URL + username + password, auto-login DVWA and return cookie string
-      - If no: optional manual cookie paste
+    Ask for login and return cookie string.
+    - If login required: auto-login DVWA and return cookies.
+    - Else: optional manual cookie paste.
     """
     need_login = input("Login required? (y/N): ").strip().lower() == "y"
 
@@ -49,56 +89,63 @@ def _cookie_flow_once() -> str | None:
         return manual or None
 
 
-def _maybe_run_llm_report(
-    *,
-    target: str,
-    cookies: str | None,
-    sqlmap_out: str | None,
-    zap_json: str | None,
-    nikto_out: str | None,
-    vt_json: str | None,
-    vt_summary: str | None
-) -> None:
+def _press_enter_to_continue() -> None:
+    input("\nPress Enter to go back to the main menu...")
+
+
+def _resolve_default_report_paths(base_dir: str) -> dict:
     """
-    Runs LLM report if OPENAI_API_KEY exists.
-    This does NOT affect your scans; it's just analysis/reporting.
+    Fallback paths if user runs 'LLM Report' without doing scans in this session.
     """
-    import os
-    try:
-        paths = generate_llm_report(
-            target=target,
-            cookies_used=bool(cookies),
-            sqlmap_out=sqlmap_out,
-            zap_json=zap_json,
-            nikto_out=nikto_out,
-            vt_json=vt_json,
-            vt_summary=vt_summary,
-        )
-        print(f"[LLM] Report saved: {paths['json']}")
-        print(f"[LLM] Report saved: {paths['md']}")
-    except Exception as e:
-        print("[LLM] Failed to generate report ⚠️")
-        print(e)
+    def _latest_file(folder: str, exts: tuple[str, ...]) -> str | None:
+        """Return most recently modified file in folder matching extensions."""
+        try:
+            if not os.path.isdir(folder):
+                return None
+            candidates: list[str] = []
+            for name in os.listdir(folder):
+                p = os.path.join(folder, name)
+                if os.path.isfile(p) and name.lower().endswith(exts):
+                    candidates.append(p)
+            if not candidates:
+                return None
+            candidates.sort(key=lambda p: os.path.getmtime(p), reverse=True)
+            return candidates[0]
+        except Exception:
+            return None
+
+    reports_dir = os.path.join(base_dir, "reports")
+
+    # These tools overwrite stable filenames each run.
+    sqlmap_out = os.path.join(reports_dir, "sqlmap", "sqlmap_output.txt")
+    nikto_out = os.path.join(reports_dir, "nikto", "nikto_report.txt")
+    vt_json = os.path.join(reports_dir, "virustotal", "virustotal_report.json")
+    vt_summary = os.path.join(reports_dir, "virustotal", "virustotal_summary.txt")
+
+    # ZAP uses timestamped files; pick the latest JSON.
+    zap_json = _latest_file(os.path.join(reports_dir, "zap"), exts=(".json",))
+
+    return {
+        "sqlmap_out": sqlmap_out,
+        "nikto_out": nikto_out,
+        "vt_json": vt_json,
+        "vt_summary": vt_summary,
+        "zap_json": zap_json,
+    }
 
 
 def main():
     print("=== InjeXpose ===")
-    target = input("Target URL:\n> ").strip()
 
-    print("\nChoose tool:")
-    print("1) SQLMap (SQL Injection)")
-    print("2) OWASP ZAP (Spider + Active Scan)")
-    print("3) Run BOTH")
-    print("4) VirusTotal (URL Reputation Scan)")
-    print("5) Nikto (Web Server Scanner)")
-    print("6) Run ALL (SQLMap + ZAP + VirusTotal + Nikto)")
-    print("7) LLM Report (analyze existing outputs)")
-    choice = input("Enter 1/2/3/4/5/6/7: ").strip()
+    # Base dir for relative report paths (so running from anywhere still works)
+    base_dir = os.path.abspath(os.path.dirname(__file__))
 
+    # Session state (persists until you exit)
+    target = None
+    derived = None
     cookies = None
-    preset = 1
 
-    # Track outputs so we can feed them into the LLM report
+    # Track outputs so LLM can use them (no auto-LLM after scans)
     sqlmap_out = None
     zap_html = None
     zap_json = None
@@ -106,95 +153,139 @@ def main():
     vt_summary = None
     nikto_out = None
 
-    # If any tool that benefits from cookies is selected, do auth once
-    if choice in ("1", "2", "3", "5", "6"):
-        cookies = _cookie_flow_once()
+    while True:
+        # Ask target once (or when user changes it)
+        if not target:
+            target = input("Target URL (enter ONE URL; InjeXpose will adapt it for each tool):\n> ").strip()
+            derived = derive_tool_targets(target)
 
-    if choice in ("1", "3", "6"):
-        preset = _choose_level_preset()
+        print("\n==============================")
+        print(f"Target: {target}")
+        print(f"Cookies: {'SET' if cookies else 'NOT SET'}")
+        print("==============================\n")
 
-    if choice == "1":
-        sqlmap_out = run_sqlmap(target, cookies=cookies, level_preset=preset)
-        print(f"[+] SQLMap done. Output saved to: {sqlmap_out}")
-        _maybe_run_llm_report(
-            target=target, cookies=cookies,
-            sqlmap_out=sqlmap_out, zap_json=zap_json,
-            nikto_out=nikto_out, vt_json=vt_json, vt_summary=vt_summary
-        )
+        print("Main Menu:")
+        print("1) SQLMap (SQL Injection)")
+        print("2) OWASP ZAP (Spider + Active Scan)")
+        print("3) Run BOTH (SQLMap + ZAP)")
+        print("4) VirusTotal (URL Reputation Scan)")
+        print("5) Nikto (Web Server Scanner)")
+        print("6) Run ALL (SQLMap + ZAP + VirusTotal + Nikto)")
+        print("7) Generate LLM Report (Ollama) from latest outputs")
+        print("8) Login / Set Cookies")
+        print("9) Change Target URL")
+        print("0) Exit")
 
-    elif choice == "2":
-        zap_html, zap_json = run_zap_scan(target, cookies=cookies)
-        print(f"[+] ZAP done. Reports saved to: {zap_html} and {zap_json}")
-        _maybe_run_llm_report(
-            target=target, cookies=cookies,
-            sqlmap_out=sqlmap_out, zap_json=zap_json,
-            nikto_out=nikto_out, vt_json=vt_json, vt_summary=vt_summary
-        )
+        choice = input("Enter choice: ").strip()
 
-    elif choice == "3":
-        sqlmap_out = run_sqlmap(target, cookies=cookies, level_preset=preset)
-        print(f"[+] SQLMap done. Output saved to: {sqlmap_out}")
+        if choice == "0":
+            print("Bye!")
+            break
 
-        zap_html, zap_json = run_zap_scan(target, cookies=cookies)
-        print(f"[+] ZAP done. Reports saved to: {zap_html} and {zap_json}")
+        if choice == "9":
+            target = None
+            derived = None
+            # Keep cookies by default (useful), but you can reset via option 8
+            continue
 
-        _maybe_run_llm_report(
-            target=target, cookies=cookies,
-            sqlmap_out=sqlmap_out, zap_json=zap_json,
-            nikto_out=nikto_out, vt_json=vt_json, vt_summary=vt_summary
-        )
+        if choice == "8":
+            cookies = _cookie_flow_once()
+            _press_enter_to_continue()
+            continue
 
-    elif choice == "4":
-        vt_json, vt_summary = run_virustotal_url_scan(target)
-        print(f"[+] VirusTotal done. Outputs saved to: {vt_json} and {vt_summary}")
-        _maybe_run_llm_report(
-            target=target, cookies=cookies,
-            sqlmap_out=sqlmap_out, zap_json=zap_json,
-            nikto_out=nikto_out, vt_json=vt_json, vt_summary=vt_summary
-        )
+        # Cookie prompt only if the scan likely needs it AND cookies not set
+        if choice in ("1", "2", "3", "5", "6") and not cookies:
+            print("\n[INFO] This scan usually works better when logged in (DVWA).")
+            cookies = _cookie_flow_once()
 
-    elif choice == "5":
-        nikto_out = run_nikto_scan(target, cookies=cookies)
-        print(f"[+] Nikto done. Output saved to: {nikto_out}")
-        _maybe_run_llm_report(
-            target=target, cookies=cookies,
-            sqlmap_out=sqlmap_out, zap_json=zap_json,
-            nikto_out=nikto_out, vt_json=vt_json, vt_summary=vt_summary
-        )
+        if choice == "1":
+            preset = _choose_level_preset()
+            sqlmap_out = run_sqlmap(derived["sqlmap"], cookies=cookies, level_preset=preset)
+            print(f"[+] SQLMap done. Output saved to: {sqlmap_out}")
+            _press_enter_to_continue()
 
-    elif choice == "6":
-        sqlmap_out = run_sqlmap(target, cookies=cookies, level_preset=preset)
-        print(f"[+] SQLMap done. Output saved to: {sqlmap_out}")
+        elif choice == "2":
+            zap_html, zap_json = run_zap_scan(
+                derived["zap_target"],
+                cookies=cookies,
+                seed_url=derived["zap_seed"]
+            )
+            print(f"[+] ZAP done. Reports saved to: {zap_html} and {zap_json}")
+            _press_enter_to_continue()
 
-        zap_html, zap_json = run_zap_scan(target, cookies=cookies)
-        print(f"[+] ZAP done. Reports saved to: {zap_html} and {zap_json}")
+        elif choice == "3":
+            preset = _choose_level_preset()
+            sqlmap_out = run_sqlmap(derived["sqlmap"], cookies=cookies, level_preset=preset)
+            print(f"[+] SQLMap done. Output saved to: {sqlmap_out}")
 
-        vt_json, vt_summary = run_virustotal_url_scan(target)
-        print(f"[+] VirusTotal done. Outputs saved to: {vt_json} and {vt_summary}")
+            zap_html, zap_json = run_zap_scan(
+                derived["zap_target"],
+                cookies=cookies,
+                seed_url=derived["zap_seed"]
+            )
+            print(f"[+] ZAP done. Reports saved to: {zap_html} and {zap_json}")
+            _press_enter_to_continue()
 
-        nikto_out = run_nikto_scan(target, cookies=cookies)
-        print(f"[+] Nikto done. Output saved to: {nikto_out}")
+        elif choice == "4":
+            vt_json, vt_summary = run_virustotal_url_scan(derived["virustotal"])
+            print(f"[+] VirusTotal done. Outputs saved to: {vt_json} and {vt_summary}")
+            _press_enter_to_continue()
 
-        _maybe_run_llm_report(
-            target=target, cookies=cookies,
-            sqlmap_out=sqlmap_out, zap_json=zap_json,
-            nikto_out=nikto_out, vt_json=vt_json, vt_summary=vt_summary
-        )
+        elif choice == "5":
+            nikto_out = run_nikto_scan(derived["nikto"], cookies=cookies)
+            print(f"[+] Nikto done. Output saved to: {nikto_out}")
+            _press_enter_to_continue()
 
-    elif choice == "7":
-        # Just try to generate a report from whatever outputs exist.
-        # (You can point it at specific files later if you want.)
-        _maybe_run_llm_report(
-            target=target, cookies=cookies,
-            sqlmap_out="reports/sqlmap/sqlmap_output.txt",
-            zap_json=None,
-            nikto_out="reports/nikto/nikto_report.txt",
-            vt_json="reports/virustotal/virustotal_report.json",
-            vt_summary="reports/virustotal/virustotal_summary.txt"
-        )
+        elif choice == "6":
+            preset = _choose_level_preset()
+            sqlmap_out = run_sqlmap(derived["sqlmap"], cookies=cookies, level_preset=preset)
+            print(f"[+] SQLMap done. Output saved to: {sqlmap_out}")
 
-    else:
-        print("Invalid choice.")
+            zap_html, zap_json = run_zap_scan(
+                derived["zap_target"],
+                cookies=cookies,
+                seed_url=derived["zap_seed"]
+            )
+            print(f"[+] ZAP done. Reports saved to: {zap_html} and {zap_json}")
+
+            vt_json, vt_summary = run_virustotal_url_scan(derived["virustotal"])
+            print(f"[+] VirusTotal done. Outputs saved to: {vt_json} and {vt_summary}")
+
+            nikto_out = run_nikto_scan(derived["nikto"], cookies=cookies)
+            print(f"[+] Nikto done. Output saved to: {nikto_out}")
+            _press_enter_to_continue()
+
+        elif choice == "7":
+            # Prefer latest outputs from this session. If missing, fallback to default paths.
+            defaults = _resolve_default_report_paths(base_dir)
+
+            use_sqlmap = sqlmap_out or defaults["sqlmap_out"]
+            use_zap_json = zap_json or defaults["zap_json"]
+            use_nikto = nikto_out or defaults["nikto_out"]
+            use_vt_json = vt_json or defaults["vt_json"]
+            use_vt_summary = vt_summary or defaults["vt_summary"]
+
+            try:
+                paths = generate_llm_report(
+                    target=target,
+                    cookies_used=bool(cookies),
+                    sqlmap_out=use_sqlmap,
+                    zap_json=use_zap_json,
+                    nikto_out=use_nikto,
+                    vt_json=use_vt_json,
+                    vt_summary=use_vt_summary,
+                )
+                print(f"[LLM] Report saved: {paths['json']}")
+                print(f"[LLM] Report saved: {paths['md']}")
+            except Exception as e:
+                print("[LLM] Failed to generate report ⚠️")
+                print(e)
+
+            _press_enter_to_continue()
+
+        else:
+            print("Invalid choice.")
+            _press_enter_to_continue()
 
 
 if __name__ == "__main__":

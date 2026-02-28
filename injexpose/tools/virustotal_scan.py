@@ -4,6 +4,8 @@ import os
 import time
 import json
 import base64
+import ipaddress
+from urllib.parse import urlparse
 from typing import Any, Dict, Tuple, Optional
 
 import requests
@@ -14,6 +16,43 @@ VT_API_BASE = "https://www.virustotal.com/api/v3"
 
 class VirusTotalError(Exception):
     pass
+
+
+def _is_local_or_private_url(url: str) -> bool:
+    """Return True if URL hostname is localhost or a private/loopback/link-local IP."""
+    try:
+        u = urlparse(url.strip())
+        host = (u.hostname or "").strip().lower()
+        if not host:
+            return True
+
+        if host in {"localhost"}:
+            return True
+
+        # If hostname is an IP address.
+        try:
+            ip = ipaddress.ip_address(host)
+            return bool(ip.is_private or ip.is_loopback or ip.is_link_local)
+        except ValueError:
+            # Domain name. Treat as public (VT will validate).
+            return False
+    except Exception:
+        return True
+
+
+def _risk_label(malicious: int, suspicious: int, total: int) -> str:
+    """Simple, explainable risk label for URL reputation."""
+    flagged = malicious + suspicious
+    if total <= 0:
+        return "Unknown"
+    # Rough heuristics suitable for a student project.
+    if malicious >= 10 or flagged / total >= 0.20:
+        return "High"
+    if malicious >= 3 or flagged / total >= 0.05:
+        return "Medium"
+    if flagged > 0:
+        return "Low"
+    return "Very Low"
 
 
 def _get_api_key(explicit_key: Optional[str] = None) -> str:
@@ -56,6 +95,36 @@ def run_virustotal_url_scan(
     Returns: (json_path, summary_path)
     """
     os.makedirs(out_dir, exist_ok=True)
+
+    # Stable paths so "Run ALL" + LLM aggregation can always find them.
+    json_path = os.path.join(out_dir, "virustotal_report.json")
+    summary_path = os.path.join(out_dir, "virustotal_summary.txt")
+
+    # VirusTotal can't scan localhost/private targets.
+    if _is_local_or_private_url(target_url):
+        msg = (
+            "=== VirusTotal URL Scan Summary ===\n"
+            f"Target: {target_url}\n\n"
+            "Status: SKIPPED\n"
+            "Reason: VirusTotal only supports publicly reachable URLs/IPs.\n"
+            "Tip: Use a public URL (e.g., https://example.com) for VirusTotal.\n"
+        )
+
+        skipped = {
+            "target_url": target_url,
+            "ok": False,
+            "skipped": True,
+            "reason": "Local/private URL not supported by VirusTotal. Use a public URL/IP.",
+            "note": "VirusTotal is a URL reputation service; it cannot analyze services running on localhost/private networks.",
+        }
+
+        with open(json_path, "w", encoding="utf-8") as f:
+            json.dump(skipped, f, indent=2, ensure_ascii=False)
+        with open(summary_path, "w", encoding="utf-8") as f:
+            f.write(msg)
+
+        print("[VT] Skipped: VirusTotal requires a public URL/IP (cannot scan localhost/private targets).")
+        return json_path, summary_path
 
     api_key = _get_api_key(api_key)
     hdrs = _headers(api_key)
@@ -129,8 +198,6 @@ def run_virustotal_url_scan(
         url_obj_json = {}
 
     # 4) Save outputs
-    json_path = os.path.join(out_dir, "virustotal_report.json")
-    summary_path = os.path.join(out_dir, "virustotal_summary.txt")
 
     combined = {
         "target_url": target_url,
@@ -156,15 +223,23 @@ def run_virustotal_url_scan(
             .get("stats", {})
         ) or {}
 
-    malicious = stats.get("malicious", 0)
-    suspicious = stats.get("suspicious", 0)
-    harmless = stats.get("harmless", 0)
-    undetected = stats.get("undetected", 0)
-    timeout_ct = stats.get("timeout", 0)
+    malicious = int(stats.get("malicious", 0) or 0)
+    suspicious = int(stats.get("suspicious", 0) or 0)
+    harmless = int(stats.get("harmless", 0) or 0)
+    undetected = int(stats.get("undetected", 0) or 0)
+    timeout_ct = int(stats.get("timeout", 0) or 0)
+
+    total_engines = malicious + suspicious + harmless + undetected + timeout_ct
+    flagged = malicious + suspicious
+    risk = _risk_label(malicious, suspicious, total_engines)
 
     lines = [
         "=== VirusTotal URL Scan Summary ===",
         f"Target: {target_url}",
+        "",
+        f"Overall Verdict (URL Reputation): {risk}",
+        (f"Flagged Engines: {flagged}/{total_engines} (malicious={malicious}, suspicious={suspicious})")
+        if total_engines else "Flagged Engines: N/A",
         "",
         "Detection Stats:",
         f"  malicious   : {malicious}",
@@ -172,6 +247,10 @@ def run_virustotal_url_scan(
         f"  harmless    : {harmless}",
         f"  undetected  : {undetected}",
         f"  timeout     : {timeout_ct}",
+        "",
+        "Interpretation:",
+        "- This is a URL reputation scan (domain/page reputation), not a file scan.",
+        "- A low flagged ratio usually means the site itself is not widely considered malicious.",
         "",
         f"Full JSON report: {json_path}",
     ]

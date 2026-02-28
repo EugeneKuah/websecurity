@@ -1,95 +1,17 @@
 - Nikto v2.5.0/
-+ Target Host: 127.0.0.1
-+ Target Port: 80
-+ GET /: The anti-clickjacking X-Frame-Options header is not present. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options: 
-+ GET /: The X-Content-Type-Options header is not set. This could allow the user agent to render the content of the site in a different fashion to the MIME type. See: https://www.netsparker.com/web-vulnerability-scanner/vulnerabilities/missing-content-type-header/: 
-+ GET /: Server may leak inodes via ETags, header found with file /, inode: 29cf, size: 64503124a0ba0, mtime: gzip. See: CVE-2003-1418: 
-+ OPTIONS OPTIONS: Allowed HTTP Methods: GET, POST, OPTIONS, HEAD .
-+ GET ///etc/hosts: The server install allows reading of any system file by adding an extra '/' to the URL.
-+ GET /phpinfo.php: Output from the phpinfo() function was found.
-+ GET /server-status: This reveals Apache information. Comment out appropriate line in the Apache conf file or restrict access to allowed sources. See: OSVDB-561: 
-+ GET /phpinfo.php: PHP is installed, and a test script which runs phpinfo() was found. This gives a lot of system information. See: CWE-552: 
-+ GET /wp-content/themes/twentyeleven/images/headers/server.php?filesrc=/etc/hosts: A PHP backdoor file manager was found.
-+ GET /wordpress/wp-content/themes/twentyeleven/images/headers/server.php?filesrc=/etc/hosts: A PHP backdoor file manager was found.
-+ GET /wp-includes/Requests/Utility/content-post.php?filesrc=/etc/hosts: A PHP backdoor file manager was found.
-+ GET /wordpress/wp-includes/Requests/Utility/content-post.php?filesrc=/etc/hosts: A PHP backdoor file manager was found.
-+ GET /wp-includes/js/tinymce/themes/modern/Meuhy.php?filesrc=/etc/hosts: A PHP backdoor file manager was found.
-+ GET /wordpress/wp-includes/js/tinymce/themes/modern/Meuhy.php?filesrc=/etc/hosts: A PHP backdoor file manager was found.
-+ GET /assets/mobirise/css/meta.php?filesrc=: A PHP backdoor file manager was found.
-+ GET /login.cgi?cli=aa%20aa%27cat%20/etc/hosts: Some D-Link router remote command execution.
-+ GET /shell?cat+/etc/hosts: A backdoor was identified.
-- Nikto v2.5.0/
-+ Target Host: 127.0.0.1
-+ Target Port: 80
-+ GET /: The anti-clickjacking X-Frame-Options header is not present. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options: 
-+ GET /: The X-Content-Type-Options header is not set. This could allow the user agent to render the content of the site in a different fashion to the MIME type. See: https://www.netsparker.com/web-vulnerability-scanner/vulnerabilities/missing-content-type-header/: 
-+ GET /: Server may leak inodes via ETags, header found with file /, inode: 29cf, size: 64503124a0ba0, mtime: gzip. See: CVE-2003-1418: 
-+ OPTIONS OPTIONS: Allowed HTTP Methods: GET, POST, OPTIONS, HEAD .
-+ GET ///etc/hosts: The server install allows reading of any system file by adding an extra '/' to the URL.
-+ GET /phpinfo.php: Output from the phpinfo() function was found.
-+ GET /server-status: This reveals Apache information. Comment out appropriate line in the Apache conf file or restrict access to allowed sources. See: OSVDB-561: 
-+ GET /phpinfo.php: PHP is installed, and a test script which runs phpinfo() was found. This gives a lot of system information. See: CWE-552: 
-+ GET /wp-content/themes/twentyeleven/images/headers/server.php?filesrc=/etc/hosts: A PHP backdoor file manager was found.
-+ GET /wordpress/wp-content/themes/twentyeleven/images/headers/server.php?filesrc=/etc/hosts: A PHP backdoor file manager was found.
-+ GET /wp-includes/Requests/Utility/content-post.php?filesrc=/etc/hosts: A PHP backdoor file manager was found.
-+ GET /wordpress/wp-includes/Requests/Utility/content-post.php?filesrc=/etc/hosts: A PHP backdoor file manager was found.
-+ GET /wp-includes/js/tinymce/themes/modern/Meuhy.php?filesrc=/etc/hosts: A PHP backdoor file manager was found.
-+ GET /wordpress/wp-includes/js/tinymce/themes/modern/Meuhy.php?filesrc=/etc/hosts: A PHP backdoor file manager was found.
-+ GET /assets/mobirise/css/meta.php?filesrc=: A PHP backdoor file manager was found.
-+ GET /login.cgi?cli=aa%20aa%27cat%20/etc/hosts: Some D-Link router remote command execution.
-+ GET /shell?cat+/etc/hosts: A backdoor was identified.
-
-
-===== Nikto STDOUT (captured) =====
-- Nikto v2.5.0
----------------------------------------------------------------------------
-+ Target IP:          127.0.0.1
-+ Target Hostname:    127.0.0.1
-+ Target Port:        80
-+ Start Time:         2026-01-28 04:54:13 (GMT-5)
----------------------------------------------------------------------------
-+ Server: Apache/2.4.65 (Debian)
-+ /: The anti-clickjacking X-Frame-Options header is not present. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options
-+ /: The X-Content-Type-Options header is not set. This could allow the user agent to render the content of the site in a different fashion to the MIME type. See: https://www.netsparker.com/web-vulnerability-scanner/vulnerabilities/missing-content-type-header/
-+ No CGI Directories found (use '-C all' to force check all possible dirs)
-+ /: Server may leak inodes via ETags, header found with file /, inode: 29cf, size: 64503124a0ba0, mtime: gzip. See: http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2003-1418
-+ OPTIONS: Allowed HTTP Methods: GET, POST, OPTIONS, HEAD .
-+ ///etc/hosts: The server install allows reading of any system file by adding an extra '/' to the URL.
-+ /phpinfo.php: Output from the phpinfo() function was found.
-+ /server-status: This reveals Apache information. Comment out appropriate line in the Apache conf file or restrict access to allowed sources. See: OSVDB-561
-+ /phpinfo.php: PHP is installed, and a test script which runs phpinfo() was found. This gives a lot of system information. See: CWE-552
-+ /wp-content/themes/twentyeleven/images/headers/server.php?filesrc=/etc/hosts: A PHP backdoor file manager was found.
-+ /wordpress/wp-content/themes/twentyeleven/images/headers/server.php?filesrc=/etc/hosts: A PHP backdoor file manager was found.
-+ /wp-includes/Requests/Utility/content-post.php?filesrc=/etc/hosts: A PHP backdoor file manager was found.
-+ /wordpress/wp-includes/Requests/Utility/content-post.php?filesrc=/etc/hosts: A PHP backdoor file manager was found.
-+ /wp-includes/js/tinymce/themes/modern/Meuhy.php?filesrc=/etc/hosts: A PHP backdoor file manager was found.
-+ /wordpress/wp-includes/js/tinymce/themes/modern/Meuhy.php?filesrc=/etc/hosts: A PHP backdoor file manager was found.
-+ /assets/mobirise/css/meta.php?filesrc=: A PHP backdoor file manager was found.
-+ /login.cgi?cli=aa%20aa%27cat%20/etc/hosts: Some D-Link router remote command execution.
-+ /shell?cat+/etc/hosts: A backdoor was identified.
-+ 8074 requests: 0 error(s) and 17 item(s) reported on remote host
-+ End Time:           2026-01-28 04:54:32 (GMT-5) (19 seconds)
----------------------------------------------------------------------------
-+ 1 host(s) tested
-
-
-      *********************************************************************
-      Portions of the server's headers (Apache/2.4.65) are not in
-      the Nikto 2.5.0 database or are newer than the known string. Would you like
-      to submit this information (*no server specific data*) to CIRT.net
-      for a Nikto update (or you may email to sullo@cirt.net) (y/n)? 
-- Nikto v2.5.0/
 + Target Host: localhost
-+ Target Port: 8080
-+ GET /vulnerabilities/sqli/: Cookie PHPSESSID created without the httponly flag. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies: 
-+ GET /vulnerabilities/sqli/: Cookie security created without the httponly flag. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies: 
-+ GET /vulnerabilities/sqli/: The anti-clickjacking X-Frame-Options header is not present. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options: 
-+ GET /vulnerabilities/sqli/: The X-Content-Type-Options header is not set. This could allow the user agent to render the content of the site in a different fashion to the MIME type. See: https://www.netsparker.com/web-vulnerability-scanner/vulnerabilities/missing-content-type-header/: 
-+ HEAD /vulnerabilities/sqli: Apache/2.4.25 appears to be outdated (current is at least Apache/2.4.54). Apache 2.2.34 is the EOL for the 2.x branch.
-+ OPTIONS OPTIONS: Allowed HTTP Methods: OPTIONS, HEAD, GET, POST .
-+ GET /vulnerabilities/sqli/help/: Directory indexing found.
-+ GET /vulnerabilities/sqli/help/: Help directory should not be accessible.
-+ GET /vulnerabilities/sqli/source/: Directory indexing found.
++ Target Port: 8081
++ GET /: Cookie PHPSESSID created without the httponly flag. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies: 
++ GET /: Cookie security created without the httponly flag. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies: 
++ GET /: The anti-clickjacking X-Frame-Options header is not present. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options: 
++ GET /: The X-Content-Type-Options header is not set. This could allow the user agent to render the content of the site in a different fashion to the MIME type. See: https://www.netsparker.com/web-vulnerability-scanner/vulnerabilities/missing-content-type-header/: 
++ HEAD Apache/2.4.25 appears to be outdated (current is at least Apache/2.4.54). Apache 2.2.34 is the EOL for the 2.x branch.
++ GET /config/: Directory indexing found.
++ GET /config/: Configuration information may be available remotely.
++ GET /docs/: Directory indexing found.
++ GET /icons/README: Apache default file found. See: https://www.vntweb.co.uk/apache-restricting-access-to-iconsreadme/: 
++ GET /login.php: Admin login page/section found.
++ GET /.gitignore: .gitignore file found. It is possible to grasp the directory structure.
 
 
 ===== Nikto STDOUT (captured) =====
@@ -97,22 +19,23 @@
 ---------------------------------------------------------------------------
 + Target IP:          127.0.0.1
 + Target Hostname:    localhost
-+ Target Port:        8080
-+ Start Time:         2026-02-03 13:00:23 (GMT8)
++ Target Port:        8081
++ Start Time:         2026-03-01 05:47:34 (GMT8)
 ---------------------------------------------------------------------------
 + Server: Apache/2.4.25 (Debian)
-+ /vulnerabilities/sqli/: Cookie PHPSESSID created without the httponly flag. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies
-+ /vulnerabilities/sqli/: Cookie security created without the httponly flag. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies
-+ /vulnerabilities/sqli/: The anti-clickjacking X-Frame-Options header is not present. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options
-+ /vulnerabilities/sqli/: The X-Content-Type-Options header is not set. This could allow the user agent to render the content of the site in a different fashion to the MIME type. See: https://www.netsparker.com/web-vulnerability-scanner/vulnerabilities/missing-content-type-header/
-+ Root page /vulnerabilities/sqli redirects to: ../../login.php
-+ No CGI Directories found (use '-C all' to force check all possible dirs)
++ /: Cookie PHPSESSID created without the httponly flag. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies
++ /: Cookie security created without the httponly flag. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies
++ /: The anti-clickjacking X-Frame-Options header is not present. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options
++ /: The X-Content-Type-Options header is not set. This could allow the user agent to render the content of the site in a different fashion to the MIME type. See: https://www.netsparker.com/web-vulnerability-scanner/vulnerabilities/missing-content-type-header/
++ Root page / redirects to: login.php
 + Apache/2.4.25 appears to be outdated (current is at least Apache/2.4.54). Apache 2.2.34 is the EOL for the 2.x branch.
-+ OPTIONS: Allowed HTTP Methods: OPTIONS, HEAD, GET, POST .
-+ /vulnerabilities/sqli/help/: Directory indexing found.
-+ /vulnerabilities/sqli/help/: Help directory should not be accessible.
-+ /vulnerabilities/sqli/source/: Directory indexing found.
-+ 7850 requests: 0 error(s) and 9 item(s) reported on remote host
-+ End Time:           2026-02-03 13:00:32 (GMT8) (9 seconds)
++ /config/: Directory indexing found.
++ /config/: Configuration information may be available remotely.
++ /docs/: Directory indexing found.
++ /icons/README: Apache default file found. See: https://www.vntweb.co.uk/apache-restricting-access-to-iconsreadme/
++ /login.php: Admin login page/section found.
++ /.gitignore: .gitignore file found. It is possible to grasp the directory structure.
++ 9441 requests: 0 error(s) and 11 item(s) reported on remote host
++ End Time:           2026-03-01 05:47:43 (GMT8) (9 seconds)
 ---------------------------------------------------------------------------
 + 1 host(s) tested
