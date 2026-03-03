@@ -15,6 +15,7 @@ def run_sqlmap(
     cookies: str | None = None,
     level_preset: int = 1,
     out_dir: str = "reports/sqlmap",
+    scan_type: str = "forms",
 ) -> str:
     os.makedirs(out_dir, exist_ok=True)
     out_file = os.path.join(out_dir, "sqlmap_output.txt")
@@ -28,15 +29,18 @@ def run_sqlmap(
         "--random-agent",
         f"--level={level}",
         f"--risk={risk}",
-        "--crawl=3",
-        "--forms",
         "--all",
     ]
+
+    # Add scan-type specific flags
+    if scan_type == "forms":
+        cmd.extend(["--crawl=3", "--forms"])
 
     if cookies:
         cmd.append(f"--cookie={cookies}")
 
     print(f"[SQLMap] Running preset={level_preset} (level={level}, risk={risk})")
+    print(f"[SQLMap] Scan type: {scan_type.upper()}")
     print(f"[SQLMap] Cookies: {'✅ provided' if cookies else '⚠️ none'}")
     print(f"[SQLMap] Command: {' '.join(cmd)}")
     print(f"[SQLMap] Saving output to: {out_file}")

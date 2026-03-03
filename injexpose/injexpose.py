@@ -19,6 +19,20 @@ def _choose_level_preset() -> int:
     return int(pick)
 
 
+def _choose_scan_type() -> str:
+    print("\nSQLMap Scan Type:")
+    print("1) URL only (scan the URL directly)")
+    print("2) Forms (crawl and scan forms)")
+    pick = input("Choose 1/2: ").strip()
+    if pick == "1":
+        return "url"
+    elif pick == "2":
+        return "forms"
+    else:
+        print("Invalid. Defaulting to Forms.")
+        return "forms"
+
+
 def _cookie_flow_once() -> str | None:
     """
     Jordan-style:
@@ -97,6 +111,7 @@ def main():
 
     cookies = None
     preset = 1
+    scan_type = "forms"
 
     # Track outputs so we can feed them into the LLM report
     sqlmap_out = None
@@ -112,9 +127,10 @@ def main():
 
     if choice in ("1", "3", "6"):
         preset = _choose_level_preset()
+        scan_type = _choose_scan_type()
 
     if choice == "1":
-        sqlmap_out = run_sqlmap(target, cookies=cookies, level_preset=preset)
+        sqlmap_out = run_sqlmap(target, cookies=cookies, level_preset=preset, scan_type=scan_type)
         print(f"[+] SQLMap done. Output saved to: {sqlmap_out}")
         _maybe_run_llm_report(
             target=target, cookies=cookies,
@@ -132,7 +148,7 @@ def main():
         )
 
     elif choice == "3":
-        sqlmap_out = run_sqlmap(target, cookies=cookies, level_preset=preset)
+        sqlmap_out = run_sqlmap(target, cookies=cookies, level_preset=preset, scan_type=scan_type)
         print(f"[+] SQLMap done. Output saved to: {sqlmap_out}")
 
         zap_html, zap_json = run_zap_scan(target, cookies=cookies)
@@ -163,7 +179,7 @@ def main():
         )
 
     elif choice == "6":
-        sqlmap_out = run_sqlmap(target, cookies=cookies, level_preset=preset)
+        sqlmap_out = run_sqlmap(target, cookies=cookies, level_preset=preset, scan_type=scan_type)
         print(f"[+] SQLMap done. Output saved to: {sqlmap_out}")
 
         zap_html, zap_json = run_zap_scan(target, cookies=cookies)
