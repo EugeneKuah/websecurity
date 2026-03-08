@@ -1,0 +1,7 @@
+{
+  "target_url": "http://localhost:8081/vulnerabilities/sqli/",
+  "ok": false,
+  "skipped": true,
+  "reason": "Local/private URL not supported by VirusTotal. Use a public URL/IP.",
+  "note": "VirusTotal is a URL reputation service; it cannot analyze services running on localhost/private networks."
+}
