@@ -1,6 +1,0 @@
-=== VirusTotal URL Scan Summary ===
-Target: http://localhost:8081/vulnerabilities/sqli/
-
-Status: SKIPPED
-Reason: VirusTotal only supports publicly reachable URLs/IPs.
-Tip: Use a public URL (e.g., https://example.com) for VirusTotal.
