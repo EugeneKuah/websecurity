@@ -10,7 +10,7 @@ venv/
 ENV/
 
 # Generated scan outputs
-outputs/
+
 
 
 # Local secrets / cookies
