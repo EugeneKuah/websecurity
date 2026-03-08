@@ -39,3 +39,126 @@
 + End Time:           2026-03-01 05:47:43 (GMT8) (9 seconds)
 ---------------------------------------------------------------------------
 + 1 host(s) tested
+- Nikto v2.5.0/
++ Target Host: localhost
++ Target Port: 8081
++ GET /: Cookie PHPSESSID created without the httponly flag. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies: 
++ GET /: Cookie security created without the httponly flag. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies: 
++ GET /: The anti-clickjacking X-Frame-Options header is not present. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options: 
++ GET /: The X-Content-Type-Options header is not set. This could allow the user agent to render the content of the site in a different fashion to the MIME type. See: https://www.netsparker.com/web-vulnerability-scanner/vulnerabilities/missing-content-type-header/: 
++ HEAD Apache/2.4.25 appears to be outdated (current is at least Apache/2.4.54). Apache 2.2.34 is the EOL for the 2.x branch.
++ GET /config/: Directory indexing found.
++ GET /config/: Configuration information may be available remotely.
++ GET /docs/: Directory indexing found.
++ GET /icons/README: Apache default file found. See: https://www.vntweb.co.uk/apache-restricting-access-to-iconsreadme/: 
++ GET /login.php: Admin login page/section found.
++ GET /.gitignore: .gitignore file found. It is possible to grasp the directory structure.
+
+
+===== Nikto STDOUT (captured) =====
+- Nikto v2.5.0
+---------------------------------------------------------------------------
++ Target IP:          127.0.0.1
++ Target Hostname:    localhost
++ Target Port:        8081
++ Start Time:         2026-03-08 10:53:46 (GMT8)
+---------------------------------------------------------------------------
++ Server: Apache/2.4.25 (Debian)
++ /: Cookie PHPSESSID created without the httponly flag. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies
++ /: Cookie security created without the httponly flag. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies
++ /: The anti-clickjacking X-Frame-Options header is not present. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options
++ /: The X-Content-Type-Options header is not set. This could allow the user agent to render the content of the site in a different fashion to the MIME type. See: https://www.netsparker.com/web-vulnerability-scanner/vulnerabilities/missing-content-type-header/
++ Root page / redirects to: login.php
++ Apache/2.4.25 appears to be outdated (current is at least Apache/2.4.54). Apache 2.2.34 is the EOL for the 2.x branch.
++ /config/: Directory indexing found.
++ /config/: Configuration information may be available remotely.
++ /docs/: Directory indexing found.
++ /icons/README: Apache default file found. See: https://www.vntweb.co.uk/apache-restricting-access-to-iconsreadme/
++ /login.php: Admin login page/section found.
++ /.gitignore: .gitignore file found. It is possible to grasp the directory structure.
++ 9441 requests: 0 error(s) and 11 item(s) reported on remote host
++ End Time:           2026-03-08 10:53:55 (GMT8) (9 seconds)
+---------------------------------------------------------------------------
++ 1 host(s) tested
+- Nikto v2.5.0/
++ Target Host: localhost
++ Target Port: 8081
++ GET /: Cookie PHPSESSID created without the httponly flag. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies: 
++ GET /: Cookie security created without the httponly flag. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies: 
++ GET /: The anti-clickjacking X-Frame-Options header is not present. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options: 
++ GET /: The X-Content-Type-Options header is not set. This could allow the user agent to render the content of the site in a different fashion to the MIME type. See: https://www.netsparker.com/web-vulnerability-scanner/vulnerabilities/missing-content-type-header/: 
++ HEAD Apache/2.4.25 appears to be outdated (current is at least Apache/2.4.54). Apache 2.2.34 is the EOL for the 2.x branch.
++ GET /config/: Directory indexing found.
++ GET /config/: Configuration information may be available remotely.
++ GET /docs/: Directory indexing found.
++ GET /icons/README: Apache default file found. See: https://www.vntweb.co.uk/apache-restricting-access-to-iconsreadme/: 
++ GET /login.php: Admin login page/section found.
++ GET /.gitignore: .gitignore file found. It is possible to grasp the directory structure.
+
+
+===== Nikto STDOUT (captured) =====
+- Nikto v2.5.0
+---------------------------------------------------------------------------
++ Target IP:          127.0.0.1
++ Target Hostname:    localhost
++ Target Port:        8081
++ Start Time:         2026-03-08 10:57:43 (GMT8)
+---------------------------------------------------------------------------
++ Server: Apache/2.4.25 (Debian)
++ /: Cookie PHPSESSID created without the httponly flag. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies
++ /: Cookie security created without the httponly flag. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies
++ /: The anti-clickjacking X-Frame-Options header is not present. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options
++ /: The X-Content-Type-Options header is not set. This could allow the user agent to render the content of the site in a different fashion to the MIME type. See: https://www.netsparker.com/web-vulnerability-scanner/vulnerabilities/missing-content-type-header/
++ Root page / redirects to: login.php
++ Apache/2.4.25 appears to be outdated (current is at least Apache/2.4.54). Apache 2.2.34 is the EOL for the 2.x branch.
++ /config/: Directory indexing found.
++ /config/: Configuration information may be available remotely.
++ /docs/: Directory indexing found.
++ /icons/README: Apache default file found. See: https://www.vntweb.co.uk/apache-restricting-access-to-iconsreadme/
++ /login.php: Admin login page/section found.
++ /.gitignore: .gitignore file found. It is possible to grasp the directory structure.
++ 9441 requests: 0 error(s) and 11 item(s) reported on remote host
++ End Time:           2026-03-08 10:57:52 (GMT8) (9 seconds)
+---------------------------------------------------------------------------
++ 1 host(s) tested
+- Nikto v2.5.0/
++ Target Host: localhost
++ Target Port: 8081
++ GET /: Cookie PHPSESSID created without the httponly flag. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies: 
++ GET /: Cookie security created without the httponly flag. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies: 
++ GET /: The anti-clickjacking X-Frame-Options header is not present. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options: 
++ GET /: The X-Content-Type-Options header is not set. This could allow the user agent to render the content of the site in a different fashion to the MIME type. See: https://www.netsparker.com/web-vulnerability-scanner/vulnerabilities/missing-content-type-header/: 
++ HEAD Apache/2.4.25 appears to be outdated (current is at least Apache/2.4.54). Apache 2.2.34 is the EOL for the 2.x branch.
++ GET /config/: Directory indexing found.
++ GET /config/: Configuration information may be available remotely.
++ GET /docs/: Directory indexing found.
++ GET /icons/README: Apache default file found. See: https://www.vntweb.co.uk/apache-restricting-access-to-iconsreadme/: 
++ GET /login.php: Admin login page/section found.
++ GET /.gitignore: .gitignore file found. It is possible to grasp the directory structure.
+
+
+===== Nikto STDOUT (captured) =====
+- Nikto v2.5.0
+---------------------------------------------------------------------------
++ Target IP:          127.0.0.1
++ Target Hostname:    localhost
++ Target Port:        8081
++ Start Time:         2026-03-08 11:58:29 (GMT8)
+---------------------------------------------------------------------------
++ Server: Apache/2.4.25 (Debian)
++ /: Cookie PHPSESSID created without the httponly flag. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies
++ /: Cookie security created without the httponly flag. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies
++ /: The anti-clickjacking X-Frame-Options header is not present. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options
++ /: The X-Content-Type-Options header is not set. This could allow the user agent to render the content of the site in a different fashion to the MIME type. See: https://www.netsparker.com/web-vulnerability-scanner/vulnerabilities/missing-content-type-header/
++ Root page / redirects to: login.php
++ Apache/2.4.25 appears to be outdated (current is at least Apache/2.4.54). Apache 2.2.34 is the EOL for the 2.x branch.
++ /config/: Directory indexing found.
++ /config/: Configuration information may be available remotely.
++ /docs/: Directory indexing found.
++ /icons/README: Apache default file found. See: https://www.vntweb.co.uk/apache-restricting-access-to-iconsreadme/
++ /login.php: Admin login page/section found.
++ /.gitignore: .gitignore file found. It is possible to grasp the directory structure.
++ 9441 requests: 0 error(s) and 11 item(s) reported on remote host
++ End Time:           2026-03-08 11:58:38 (GMT8) (9 seconds)
+---------------------------------------------------------------------------
++ 1 host(s) tested

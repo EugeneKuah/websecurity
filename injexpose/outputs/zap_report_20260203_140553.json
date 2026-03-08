@@ -1,8 +1,0 @@
-{
-  "tool": "OWASP ZAP",
-  "zap_api": "http://127.0.0.1:8080",
-  "target": "http://localhost:8081/vulnerabilities/sqli/?id=&Submit=Submit#",
-  "cookies": "PHPSESSID=nfvv8flmqn0i0mno9si3vcueh0; security=low",
-  "status": "ZAP running. Spider/Active scan export not yet implemented in tools/zap_scan.py.",
-  "timestamp": "2026-02-03 14:05:53"
-}

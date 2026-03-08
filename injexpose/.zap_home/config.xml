@@ -231,12 +231,44 @@
     <script>
         <console version="1"/>
         <scripts>
+            <name>Debug Error Disclosure</name>
+            <description/>
+            <engine>Graal.js</engine>
+            <type>websocketpassive</type>
+            <enabled>true</enabled>
+            <file>/home/jordan/websecurity/injexpose/.zap_home/scripts/scripts/websocketpassive/Debug Error Disclosure.js</file>
+        </scripts>
+        <scripts>
             <name>Base64 Disclosure</name>
             <description/>
             <engine>Graal.js</engine>
             <type>websocketpassive</type>
             <enabled>true</enabled>
             <file>/home/jordan/websecurity/injexpose/.zap_home/scripts/scripts/websocketpassive/Base64 Disclosure.js</file>
+        </scripts>
+        <scripts>
+            <name>PII Disclosure</name>
+            <description/>
+            <engine>Graal.js</engine>
+            <type>websocketpassive</type>
+            <enabled>true</enabled>
+            <file>/home/jordan/websecurity/injexpose/.zap_home/scripts/scripts/websocketpassive/PII Disclosure.js</file>
+        </scripts>
+        <scripts>
+            <name>Username Idor Scanner</name>
+            <description/>
+            <engine>Graal.js</engine>
+            <type>websocketpassive</type>
+            <enabled>true</enabled>
+            <file>/home/jordan/websecurity/injexpose/.zap_home/scripts/scripts/websocketpassive/Username Idor Scanner.js</file>
+        </scripts>
+        <scripts>
+            <name>XML Comments Disclosure</name>
+            <description/>
+            <engine>Graal.js</engine>
+            <type>websocketpassive</type>
+            <enabled>true</enabled>
+            <file>/home/jordan/websecurity/injexpose/.zap_home/scripts/scripts/websocketpassive/XML Comments Disclosure.js</file>
         </scripts>
         <scripts>
             <name>Private IP Disclosure</name>
@@ -255,44 +287,12 @@
             <file>/home/jordan/websecurity/injexpose/.zap_home/scripts/scripts/websocketpassive/Application Error Scanner.js</file>
         </scripts>
         <scripts>
-            <name>Username Idor Scanner</name>
-            <description/>
-            <engine>Graal.js</engine>
-            <type>websocketpassive</type>
-            <enabled>true</enabled>
-            <file>/home/jordan/websecurity/injexpose/.zap_home/scripts/scripts/websocketpassive/Username Idor Scanner.js</file>
-        </scripts>
-        <scripts>
-            <name>Debug Error Disclosure</name>
-            <description/>
-            <engine>Graal.js</engine>
-            <type>websocketpassive</type>
-            <enabled>true</enabled>
-            <file>/home/jordan/websecurity/injexpose/.zap_home/scripts/scripts/websocketpassive/Debug Error Disclosure.js</file>
-        </scripts>
-        <scripts>
-            <name>XML Comments Disclosure</name>
-            <description/>
-            <engine>Graal.js</engine>
-            <type>websocketpassive</type>
-            <enabled>true</enabled>
-            <file>/home/jordan/websecurity/injexpose/.zap_home/scripts/scripts/websocketpassive/XML Comments Disclosure.js</file>
-        </scripts>
-        <scripts>
             <name>Email Disclosure</name>
             <description/>
             <engine>Graal.js</engine>
             <type>websocketpassive</type>
             <enabled>true</enabled>
             <file>/home/jordan/websecurity/injexpose/.zap_home/scripts/scripts/websocketpassive/Email Disclosure.js</file>
-        </scripts>
-        <scripts>
-            <name>PII Disclosure</name>
-            <description/>
-            <engine>Graal.js</engine>
-            <type>websocketpassive</type>
-            <enabled>true</enabled>
-            <file>/home/jordan/websecurity/injexpose/.zap_home/scripts/scripts/websocketpassive/PII Disclosure.js</file>
         </scripts>
     </script>
     <requester version="2"/>
@@ -330,10 +330,6 @@
                 <api>true</api>
                 <address>localhost</address>
                 <port>8080</port>
-                <tlsProtocols>
-                    <protocol>TLSv1.2</protocol>
-                    <protocol>TLSv1.3</protocol>
-                </tlsProtocols>
                 <alpn>
                     <enabled>true</enabled>
                     <protocols>
@@ -344,6 +340,10 @@
                 <behindNat>false</behindNat>
                 <removeAcceptEncoding>true</removeAcceptEncoding>
                 <decodeResponse>true</decodeResponse>
+                <tlsProtocols>
+                    <protocol>TLSv1.2</protocol>
+                    <protocol>TLSv1.3</protocol>
+                </tlsProtocols>
             </mainProxy>
         </localServers>
         <ratelimit version="1"/>
@@ -749,6 +749,50 @@
             <extraprocessing>false</extraprocessing>
             <initiators/>
         </full_list>
+        <full_list>
+            <description>injexpose_cookie_1772937925</description>
+            <url/>
+            <enabled>true</enabled>
+            <matchtype>REQ_HEADER</matchtype>
+            <matchstr>Cookie</matchstr>
+            <regex>false</regex>
+            <replacement>PHPSESSID=gta75rc0v6285tmc54g147njv3; security=low</replacement>
+            <extraprocessing>false</extraprocessing>
+            <initiators/>
+        </full_list>
+        <full_list>
+            <description>injexpose_cookie_1772938381</description>
+            <url/>
+            <enabled>true</enabled>
+            <matchtype>REQ_HEADER</matchtype>
+            <matchstr>Cookie</matchstr>
+            <regex>false</regex>
+            <replacement>PHPSESSID=566rgaq5i3qhdjefr2rqgo1jf6; security=low</replacement>
+            <extraprocessing>false</extraprocessing>
+            <initiators/>
+        </full_list>
+        <full_list>
+            <description>injexpose_cookie_1772938619</description>
+            <url/>
+            <enabled>true</enabled>
+            <matchtype>REQ_HEADER</matchtype>
+            <matchstr>Cookie</matchstr>
+            <regex>false</regex>
+            <replacement>PHPSESSID=ui8mkp3rncamm6ovja6s3ku4s0; security=low</replacement>
+            <extraprocessing>false</extraprocessing>
+            <initiators/>
+        </full_list>
+        <full_list>
+            <description>injexpose_cookie_1772942264</description>
+            <url/>
+            <enabled>true</enabled>
+            <matchtype>REQ_HEADER</matchtype>
+            <matchstr>Cookie</matchstr>
+            <regex>false</regex>
+            <replacement>PHPSESSID=nb7ttmdr0p7knaooaq442viqu2; security=low</replacement>
+            <extraprocessing>false</extraprocessing>
+            <initiators/>
+        </full_list>
     </replacer>
     <globalalertfilter version="1"/>
     <hud version="4">
@@ -768,6 +812,6 @@
         <thread>4</thread>
     </spider>
     <start>
-        <dayLastChecked>2026-03-01</dayLastChecked>
+        <dayLastChecked>2026-03-08</dayLastChecked>
     </start>
 </config>
